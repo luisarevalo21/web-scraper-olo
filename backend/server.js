@@ -5,7 +5,7 @@ const apiRoutes = require("./routes/scrape");
 const dotenv = require("dotenv");
 const { connectToDb, getDb } = require("./config/db");
 const { ObjectId } = require("mongodb");
-
+const allowedOrigins = require("./config/allowedOrigins");
 // Load environment variables
 dotenv.config();
 
@@ -21,20 +21,21 @@ connectToDb(error => {
     db = getDb();
   }
 });
-console.log("db", db);
+
+app.use(express.static(path.join(__dirname, "../client/build")));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
 // Enable CORS
-app.use(cors());
-app.use(
-  cors({
-    origin: `${process.env.FRONTEND_URL}`, // Replace with your frontend URL
-    methods: "GET,POST", // Allow specific HTTP methods
-    allowedHeaders: "Content-Type,Authorization", // Allow specific headers
-  })
-);
+app.use(cors({ origin: allowedOrigins, credentials: true, optionsSuccessStatus: 200 }));
+// app.use(
+//   cors({
+//     origin: `${process.env.FRONTEND_URL}`, // Replace with your frontend URL
+//     methods: "GET,POST", // Allow specific HTTP methods
+//     allowedHeaders: "Content-Type,Authorization", // Allow specific headers
+//   })
+// );
 // allow OPTIONS on all resources
 app.options("*", cors());
 
